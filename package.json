@@ -1,0 +1,20 @@
+{
+  "name": "md-links-mj",
+  "version": "1.0.0",
+  "description": "Javascript library for verifying readme.md links.",
+  "main": "index.js",
+  "start": "serve ./src",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2"
+  },
+  "author": "Maria Jose Aquino",
+  "license": "ISC",
+  "dependencies": {
+    "editorconfig": "^0.15.3"
+  }
+}
