@@ -4,17 +4,26 @@
   "description": "Javascript library for verifying readme.md links.",
   "main": "index.js",
   "start": "serve ./src",
-  "directories": {
-    "test": "test"
+  "scripts": {
+    "build": "babel src -d lib",
+    "test": "jest"
   },
   "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
+    "@babel/preset-env": "^7.8.4",
     "eslint": "^6.5.1",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.18.2"
+    "eslint-plugin-import": "^2.18.2",
+    "jest": "^25.1.0"
   },
   "author": "Maria Jose Aquino",
   "license": "ISC",
   "dependencies": {
-    "editorconfig": "^0.15.3"
+    "chalk": "^3.0.0",
+    "editorconfig": "^0.15.3",
+    "fetch": "^1.1.0",
+    "markdown-link-extractor": "^1.2.2",
+    "node-fetch": "^2.6.0"
   }
 }
