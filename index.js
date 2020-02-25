@@ -3,10 +3,9 @@ const fs = require('fs');
 const process = require('process');
 const chalk = require('chalk');
 const https = require('https');
-const fetchUrl = require('fetch').fetchUrl;
-console.log(fetchUrl);
+const fetch = require('node-fetch');
 let fileText = '';
-let links = [];
+
 
 /******************** 1. Recibiendo parametros *****************/
 const route = process.argv[2];
@@ -24,42 +23,47 @@ const statsParameter = options.includes('--stats') || options.includes('--s');
 6.Obtener length de array de links
 *********************/
 const routeIsMd = path.extname(route) === '.md',// 3
-      readFile = fs.readFileSync(route, 'utf-8'), //4
-      regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))/g,
-      linksInFile = readFile.match(regex), //5
-      linksLength = linksInFile.length; //6
-      const validLinks = [];
-      const brokenLinks =[];
+readFile = fs.readFileSync(route, 'utf-8'), //4
+regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))/g,
+linksInFile = readFile.match(regex), //5
+linksLength = linksInFile.length; //6
+
+let links = [];
+  links.push({
+    href: linksInFile,
+    path: route,
+    text: 'Text'
+  });
+
+console.log(links);
+
 const validateLinks = () => {  
-  
-  for (let i = 0; i < linksInFile.length; i++) {       
-    fetchUrl(linksInFile[i], function(error, meta, body){
-      if (meta.status == 200) {
-        validLinks.push(linksInFile[i]);
-      } else {
-        brokenLinks.push(linksInFile[i]);
-      }
-    }); 
-  }
-  setTimeout(()=>{
-    console.log(validLinks);
-    console.log(brokenLinks);
-  }, 6000);
-  
+  linksInFile.map((element) => {    
+		fetch(element)
+			.then(response => {
+				if (response.status >= 200 && response.status < 300) {
+          let validLinks = chalk.green('[✔]') + chalk.cyan(element) + chalk.bgGreen(` ${response.status} ${response.statusText} `);
+          console.log(validLinks);        
+				} else {
+          let brokenLinks = chalk.red('[X]') + chalk.cyan(element) + chalk.bgRed(` ${response.status} ${response.statusText} `);
+          console.log(brokenLinks);          
+				}
+			}).catch((error) => console.log(chalk.gray('[-]'), chalk.cyan(element), chalk.bgRed(` ${error.type} ${error.code} `)));
+	})
 }
 
-function mdLinks () {
+const mdLinks = () => {
   if(routeIsMd){ // Es archivo .md?
     fileText = readFile; 
     if(linksLength !== 0){ // if(linksLength) Hay links?
-      if(validateParameter == false && statsParameter == false){
-      console.log('This are the links in your .md file: \n ', linksInFile);      
-      }else if (validateParameter == true && statsParameter == true){
+      if(validateParameter == false && statsParameter == false){ //validate & stats = false
+      console.log('This are the links in your .md file: \n ', chalk.cyan(linksInFile));      
+      }else if (validateParameter == true && statsParameter == true){ // validate & stats = true
         console.log('Total: Broken: Unique:');
-        }else if(validateParameter == true){
+        }else if(validateParameter == true){ // validate = true
             console.log('This are the status of your links: \n ');
             validateLinks(); //await promise.all()     
-          }else if(statsParameter == true){
+          }else if(statsParameter == true){ // validate = false
             console.log(`You have ${linksLength} links in your .md file`); 
           }        
   }else{
@@ -126,4 +130,19 @@ console.log(arrayLinks); */
 let syncData = fs.readFileSync('./README.md', 'utf-8');
 console.log(syncData);
  */
-
+/* const validLinks = [];
+  const brokenLinks =[];  
+  for (let i = 0; i < linksInFile.length; i++) {       
+    fetchUrl(linksInFile[i], function(error, meta, body){
+      if (meta.status == 200) {
+        validLinks.push(linksInFile[i]);
+      } else {
+        brokenLinks.push(linksInFile[i]);
+      }
+    }); 
+  }
+  setTimeout(()=>{
+    console.log(validLinks);
+    console.log(brokenLinks);
+  }, 6000);
+   */
