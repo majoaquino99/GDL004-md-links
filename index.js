@@ -2,9 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const process = require('process');
 const chalk = require('chalk');
-const https = require('https');
 const fetch = require('node-fetch');
-let fileText = '';
 
 
 /******************** 1. Recibiendo parametros *****************/
@@ -28,28 +26,39 @@ regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/
 linksInFile = readFile.match(regex), //5
 linksLength = linksInFile.length; //6
 
-let links = [];
-  links.push({
-    href: linksInFile,
-    path: route,
-    text: 'Text'
-  });
-
-console.log(links);
 
 const validateLinks = () => {  
-  linksInFile.map((element) => {    
-		fetch(element)
-			.then(response => {
-				if (response.status >= 200 && response.status < 300) {
-          let validLinks = chalk.green('[✔]') + chalk.cyan(element) + chalk.bgGreen(` ${response.status} ${response.statusText} `);
-          console.log(validLinks);        
-				} else {
-          let brokenLinks = chalk.red('[X]') + chalk.cyan(element) + chalk.bgRed(` ${response.status} ${response.statusText} `);
-          console.log(brokenLinks);          
-				}
-			}).catch((error) => console.log(chalk.gray('[-]'), chalk.cyan(element), chalk.bgRed(` ${error.type} ${error.code} `)));
-	})
+  let linksArray = [];
+  linksInFile.forEach((linksInFile) => {
+      let linkInfo = {
+      path: route,
+      href: linksInFile,
+      text: 'Text'     
+    };
+    linksArray.push(linkInfo);
+    return linksArray
+    });  
+      linksArray.map((element) => {      
+      fetch(element.href)
+        .then(response => {          
+          if (response.status >= 200 && response.status < 300) {
+            let validLinks = element.href.length;
+            let validLinksOutput = chalk.green('[✔]') + chalk.cyan(element.href) 
+            + chalk.bgGreen(` ${response.status} ${response.statusText} `) 
+            + '\n' + '\n' + chalk.yellowBright(element.path);
+            console.log(validLinksOutput); 
+            console.log(validLinks);      
+          } else {
+            let brokenLinks = element.length;
+            let brokenLinksOutput = chalk.red('[X]') + chalk.cyan(element.href) 
+            + chalk.bgRed(` ${response.status} ${response.statusText} `) 
+            + '\n' + '\n' + chalk.whiteBright(element.path);
+            console.log(brokenLinksOutput);  
+            console.log(brokenLinks);                    
+          }
+        }).catch((error) => console.log(chalk.gray('[-]'), chalk.cyan(element.href), 
+        chalk.bgRed(` ${error.type} ${error.code} `), chalk.whiteBright(element.path)));
+    })
 }
 
 const mdLinks = () => {
@@ -146,3 +155,26 @@ console.log(syncData);
     console.log(brokenLinks);
   }, 6000);
    */
+
+   /* 
+linksInFile.forEach(function (linksInFile) {
+let linksArray = [];
+let linkInfo = {
+  path: route,
+  href: linksInFile,
+  text: 'Text'     
+};
+linksArray[0] = linkInfo;
+return linksArray
+}); */
+
+
+/* let linksArray = [];
+let linkInfo = {
+  href: linksInFile,
+  path: route,
+  text: 'Text'
+}
+linksArray[0] = linkInfo;
+
+console.log(linksArray[0]); */
