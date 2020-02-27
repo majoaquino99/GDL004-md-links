@@ -4,177 +4,108 @@ const process = require('process');
 const chalk = require('chalk');
 const fetch = require('node-fetch');
 
+/********** Options ***********/
+const routeMD = process.argv[2],
+options = process.argv,
+validateParameter = options.includes('--validate') || options.includes('--v'),
+statsParameter = options.includes('--stats') || options.includes('--s');
 
-/******************** 1. Recibiendo parametros *****************/
-const route = process.argv[2];
-const options = process.argv/* .slice(3, process.argv.length) */;
-const validateParameter = options.includes('--validate') || options.includes('--v');
-const statsParameter = options.includes('--stats') || options.includes('--s');
-
-
-/******************** 2.Revisando que la ruta sea un archivo *************/
-
-/******************** 
-3.Revisando que el archivo sea un archivo .md 
-4.Leyendo archivo, convirtiendo de buffer a utf-8
-5.Encontrando links con RegEx, guardando en array
-6.Obtener length de array de links
-*********************/
-const routeIsMd = path.extname(route) === '.md',// 3
-readFile = fs.readFileSync(route, 'utf-8'), //4
-regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))/g,
-linksInFile = readFile.match(regex), //5
-linksLength = linksInFile.length; //6
-
-
-const validateLinks = () => {  
-  let linksArray = [];
-  linksInFile.forEach((linksInFile) => {
-      let linkInfo = {
-      path: route,
-      href: linksInFile,
-      text: 'Text'     
-    };
-    linksArray.push(linkInfo);
-    return linksArray
-    });  
-      linksArray.map((element) => {      
-      fetch(element.href)
-        .then(response => {          
-          if (response.status >= 200 && response.status < 300) {
-            let validLinks = element.href.length;
-            let validLinksOutput = chalk.green('[✔]') + chalk.cyan(element.href) 
-            + chalk.bgGreen(` ${response.status} ${response.statusText} `) 
-            + '\n' + '\n' + chalk.yellowBright(element.path);
-            console.log(validLinksOutput); 
-            console.log(validLinks);      
-          } else {
-            let brokenLinks = element.length;
-            let brokenLinksOutput = chalk.red('[X]') + chalk.cyan(element.href) 
-            + chalk.bgRed(` ${response.status} ${response.statusText} `) 
-            + '\n' + '\n' + chalk.whiteBright(element.path);
-            console.log(brokenLinksOutput);  
-            console.log(brokenLinks);                    
-          }
-        }).catch((error) => console.log(chalk.gray('[-]'), chalk.cyan(element.href), 
-        chalk.bgRed(` ${error.type} ${error.code} `), chalk.whiteBright(element.path)));
-    })
+const parameters = {
+    noParameter: validateParameter == false && statsParameter == false,
+    validateAndStats: validateParameter == true && statsParameter == true,
+    validate: validateParameter == true,
+    stats: statsParameter == true
 }
+/********* Regular expression ****/
+const regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))/gm;
+/********* Main function *********/
+const mdLinks = (route, options) => {
+    if(path.extname(route) === '.md'){
+        const readFilePlease = (route) => {
+            return new Promise((resolve, reject) => {
+                fs.readFile(route, 'utf-8', (error, content) => {
+                    if (error) return reject(`Error ${error}`);
+                    resolve(content);
+                    //console.log(data);                            
+                }) 
+            });
+        } 
+        readFilePlease(route)
+        .then(data => {          
+            const linksInFile = data.match(regex),
+            linksLength = linksInFile.length;
+            //console.log(linksInFile);
+            let linksArray = [];            
+                if(linksLength){
+                    linksInFile.forEach((element) =>  {                          
+                        let linkObject = {
+                        path: route,
+                        href: element,
+                        text: 'Aquí iría el label de link'  
+                        };
+                            linksArray.push(linkObject)
+                            return linksArray 
+                        });             
+                        if(options.validate == false && options.stats == false){
+                            console.log(chalk.magentaBright('This are the links in your .md file:'));
+                            console.group(linksArray); 
+                            } else if (options.validate == true & options.stats == true){
+                                console.log(validateLinks(linksArray), statsLinks(linksArray));                 
+                                } else if (options.validate == true){
+                                    console.log('This is the status of your links:');
+                                    console.log(validateLinks(linksArray));                            
+                                    } else if (options.stats == true){
+                                        console.log(`You have ${linksLength} links in your .md file`); 
+                                        console.log(statsLinks(linksInFile));
+                                    }
 
-const mdLinks = () => {
-  if(routeIsMd){ // Es archivo .md?
-    fileText = readFile; 
-    if(linksLength !== 0){ // if(linksLength) Hay links?
-      if(validateParameter == false && statsParameter == false){ //validate & stats = false
-      console.log('This are the links in your .md file: \n ', chalk.cyan(linksInFile));      
-      }else if (validateParameter == true && statsParameter == true){ // validate & stats = true
-        console.log('Total: Broken: Unique:');
-        }else if(validateParameter == true){ // validate = true
-            console.log('This are the status of your links: \n ');
-            validateLinks(); //await promise.all()     
-          }else if(statsParameter == true){ // validate = false
-            console.log(`You have ${linksLength} links in your .md file`); 
-          }        
-  }else{
-    console.log('Your file has no links.');    
-  } 
-  }else{
-    console.log('Your file is not an .md file'); 
- }
-}
-
-mdLinks();
-
-/* 
-const mdPath = process.argv[2];
-
-const mdValidation = () => { //validating existance of .md file
-  let mdExtension = path.extname(mdPath);
-  if (mdExtension == '.md'){
-    readMD(mdPath)    
-    }
-    else{
-     console.log ('Ivalid file extension or path.')
-    }
-}
- */
-/* const readMD = mdPath => {  
-  let syncReadFile = fs.readFileSync(mdPath, 'utf-8');   
-  const regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))/g;
-  const foundLinks = syncReadFile.match(regex);
-  if(foundLinks === null){
-    console.log('No links found');    
-  }else{
-    console.log('This are the links in your .md file: \n ', foundLinks); 
-  }  
-/*   const linksLength = foundLinks.length;
-  console.log(`You have ${linksLength} links in your .md file`);   
-
-
-mdValidation(); */
-
-/* 
-const markdownLinkExtractor = require('markdown-link-extractor');
-let linksMD = markdownLinkExtractor(syncReadFile);
-linksMD.forEach(function (linksMD) {
-  
-  let arrayLinks = {
-    linkPath: mdPath,
-    linkURL: linksMD,
-    linkStatus:'The Link is'      
-};
-
-console.log(arrayLinks); */
-
-
-
-/* fs.readFile('./README2.md', (error, data) => {
-    if (error){ 
-    console.log(`Error ${error}`);
+                }else{
+                    console.log('Your file has no links');                      
+                }                              
+        })
+        .catch(error => console.log(error));                        
     }else{
-      console.log(data);      
-    }
-  }); 
-
-let syncData = fs.readFileSync('./README.md', 'utf-8');
-console.log(syncData);
- */
-/* const validLinks = [];
-  const brokenLinks =[];  
-  for (let i = 0; i < linksInFile.length; i++) {       
-    fetchUrl(linksInFile[i], function(error, meta, body){
-      if (meta.status == 200) {
-        validLinks.push(linksInFile[i]);
-      } else {
-        brokenLinks.push(linksInFile[i]);
-      }
-    }); 
-  }
-  setTimeout(()=>{
-    console.log(validLinks);
-    console.log(brokenLinks);
-  }, 6000);
-   */
-
-   /* 
-linksInFile.forEach(function (linksInFile) {
-let linksArray = [];
-let linkInfo = {
-  path: route,
-  href: linksInFile,
-  text: 'Text'     
-};
-linksArray[0] = linkInfo;
-return linksArray
-}); */
-
-
-/* let linksArray = [];
-let linkInfo = {
-  href: linksInFile,
-  path: route,
-  text: 'Text'
+        console.log('Your file is not a .md file.');
+        
+    }    
 }
-linksArray[0] = linkInfo;
 
-console.log(linksArray[0]); */
+
+const validateLinks = (linksArray) => {  
+    linksArray.map((element) => {      
+            fetch(element.href)
+              .then(response => {        
+                if (response.status >= 200 && response.status < 300) {
+                  let validLinks = chalk.green('[✔]') + chalk.cyan(element.href) 
+                  + chalk.bgGreen(` ${response.status} ${response.statusText} `) 
+                  + '\n' + chalk.yellowBright(element.path);
+                  console.log(validLinks);    
+                } else {
+                  let brokenLinks = chalk.red('[X]') + chalk.cyan(element.href) 
+                  + chalk.bgRed(` ${response.status} ${response.statusText} `) 
+                  + '\n' +  chalk.whiteBright(element.path);
+                  console.log(brokenLinks);                      
+                } 
+              }).catch((error) => console.log(chalk.gray('[-]'), chalk.cyan(element.href), 
+              chalk.bgRed(` ${error.type} ${error.code} `), chalk.whiteBright(element.path)));
+          })
+}
+const statsLinks = (links) => {   
+        let validLinks = 0;
+        let brokenLinks = 0;
+        for (let i=0; i < links.length; i++){
+            fetch(links[i])
+            .then((response) => {            
+                if(response.status >= 200 && response.status < 300 ) {
+                validLinks++ ;             
+            }else{
+                brokenLinks++ ;
+            }
+            }).then(() => {
+                if(validLinks + brokenLinks == links.length){
+                    console.log(` ${chalk.bgGreen('✔ Total :')}   ${links.length}\n ✔ Unique : ${validLinks}\n ${chalk.redBright('✖ Broken')} : ${brokenLinks}`);                
+                }
+            }).catch(error => console.log(error.type, error.code));
+        }   
+}
+mdLinks(routeMD, parameters)
