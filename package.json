@@ -6,7 +6,10 @@
   "start": "serve ./src",
   "scripts": {
     "build": "babel src -d lib",
-    "test": "jest"
+    "test": "jest --coverage",
+    "eslint": "eslint --fix --ext .js ./ test/",
+    "pretest": "npm run eslint"
+
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
