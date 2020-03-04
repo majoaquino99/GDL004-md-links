@@ -1,9 +1,9 @@
 const path = require('path');
 const process = require('process');
 const chalk = require('chalk');
-const { readFilePlease } = require('./readsfile.js');
-const { validateLinks } = require('./validate.js');
-const { statsLinks } = require('./statistics.js');
+const { readFilePlease } = require('./scripts/readsfile.js');
+const { validateLinks } = require('./scripts/validate.js');
+const { statsLinks } = require('./scripts/statistics.js');
 
 /** ******** Options ***********/
 const routeMD = process.argv[2],
