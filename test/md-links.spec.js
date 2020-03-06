@@ -1,7 +1,7 @@
-import { readFilePlease } from '../readsfile.js';
+import { readFilePlease } from '../scripts/readsfile.js/index.js';
 // import { mdLinks } from '../index.js';
 // import mockLinks from './mock.js';
-import {validateLinks} from '../validate.js';
+import {validateLinks} from '../scripts/validate.js/index.js';
 
 
 describe('validateLinks', () => {

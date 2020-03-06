@@ -9,7 +9,6 @@
     "test": "jest --coverage",
     "eslint": "eslint --fix --ext .js ./ test/",
     "pretest": "npm run eslint"
-
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -27,6 +26,10 @@
     "editorconfig": "^0.15.3",
     "fetch": "^1.1.0",
     "markdown-link-extractor": "^1.2.2",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "yargs": "^15.1.0"
+  },
+  "bin": {
+    "mj-links": "cli.js"
   }
 }
