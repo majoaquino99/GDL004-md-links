@@ -1,11 +1,17 @@
 const chalk = require('chalk');
 const fetch = require('node-fetch');
-module.exports.validateLinks = (linksArray) => {  
-  
-  let promises = linksArray.map((element) => {      
-    return fetch(element.href);
+module.exports.validateLinks = (linksArray) => {    
+  let promises = linksArray.map(async (element) => {  
+    let result = {}; 
+    try {
+      result = await fetch(element.href);
+    } catch (error) {
+     console.log(`Error: ${error.message}`);      
+    }   
+    return result;
+    
   });
-  Promise.all(promises)
+   Promise.all(promises)
     .then((data) => {
       const validLinks = [];
       const brokenLinks = [];
