@@ -6,6 +6,12 @@ module.exports.validateLinks = (linksArray) => {
     try {
       result = await fetch(element.href);
     } catch (error) {
+      /* for (let i = 0; i < promises.length; ++i) {
+        if (error.code === 'ENOTFOUND') {
+            promises.splice(i--, 1);
+        }
+    } */
+    
      console.log(`Error: ${error.message}`);      
     }   
     return result;
